@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gerenciador Financeiro Pessoal</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <div class="container">
+        <header class="header">
+            <div class="header-content">
+                <h1><i class="fas fa-wallet"></i> Gerenciador Financeiro</h1>
+                <div class="header-actions">
+                    <button class="btn btn-secondary" id="exportBtn"><i class="fas fa-download"></i> Exportar</button>
+                    <button class="btn btn-secondary" id="importBtn"><i class="fas fa-upload"></i> Importar</button>
+                    <input type="file" id="importFile" accept=".json" style="display: none;">
+                </div>
+            </div>
+        </header>
+        <section class="dashboard">
+            <div class="card card-receitas">
+                <div class="card-icon"><i class="fas fa-arrow-up"></i></div>
+                <div class="card-content">
+                    <h3>Receitas</h3>
+                    <p class="card-value" id="totalReceitas">R$ 0,00</p>
+                </div>
+            </div>
+            <div class="card card-despesas">
+                <div class="card-icon"><i class="fas fa-arrow-down"></i></div>
+                <div class="card-content">
+                    <h3>Despesas</h3>
+                    <p class="card-value" id="totalDespesas">R$ 0,00</p>
+                </div>
+            </div>
+            <div class="card card-saldo" id="saldoCard">
+                <div class="card-icon"><i class="fas fa-balance-scale"></i></div>
+                <div class="card-content">
+                    <h3>Saldo Atual</h3>
+                    <p class="card-value" id="saldoAtual">R$ 0,00</p>
+                    <small id="saldoData">Hoje</small>
+                </div>
+            </div>
+            <div class="card card-projecao">
+                <div class="card-icon"><i class="fas fa-chart-line"></i></div>
+                <div class="card-content">
+                    <h3>Projeção Final</h3>
+                    <p class="card-value" id="saldoProjetado">R$ 0,00</p>
+                    <small>Até o final do mês</small>
+                </div>
+            </div>
+        </section>
+        <section class="add-transaction">
+            <h2><i class="fas fa-plus-circle"></i> Nova Transação</h2>
+            <form id="transactionForm">
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label for="dia">Dia</label>
+                        <input type="number" id="dia" min="1" max="31" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="mes">Mês</label>
+                        <select id="mes" required>
+                            <option value="1">Janeiro</option>
+                            <option value="2">Fevereiro</option>
+                            <option value="3">Março</option>
+                            <option value="4">Abril</option>
+                            <option value="5">Maio</option>
+                            <option value="6">Junho</option>
+                            <option value="7">Julho</option>
+                            <option value="8">Agosto</option>
+                            <option value="9">Setembro</option>
+                            <option value="10">Outubro</option>
+                            <option value="11" selected>Novembro</option>
+                            <option value="12">Dezembro</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="tipo">Tipo</label>
+                        <select id="tipo" required>
+                            <option value="entrada">Receita</option>
+                            <option value="saida">Despesa</option>
+                        </select>
+                    </div>
+                    <div class="form-group full-width">
+                        <label for="historico">Descrição</label>
+                        <input type="text" id="historico" list="historicoSuggestions" required>
+                        <datalist id="historicoSuggestions"></datalist>
+                    </div>
+                    <div class="form-group" id="categoriaGroup" style="display: none;">
+                        <label for="categoria">Categoria</label>
+                        <select id="categoria">
+                            <option value="Moradia">🏠 Moradia</option>
+                            <option value="Alimentação">🍽️ Alimentação</option>
+                            <option value="Transporte">🚗 Transporte</option>
+                            <option value="Saúde">💊 Saúde</option>
+                            <option value="Educação">📚 Educação</option>
+                            <option value="Lazer">🎮 Lazer</option>
+                            <option value="Vestuário">👔 Vestuário</option>
+                            <option value="Beleza">💄 Beleza</option>
+                            <option value="Pet">🐾 Pet</option>
+                            <option value="Outros">📦 Outros</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="valor">Valor (R$)</label>
+                        <input type="text" id="valor" placeholder="0,00" required>
+                    </div>
+                </div>
+                <button type="submit" class="btn btn-primary"><i class="fas fa-check"></i> Adicionar</button>
+            </form>
+        </section>
+        <section class="transactions-table">
+            <h2><i class="fas fa-list"></i> Transações</h2>
+            <div class="table-responsive">
+                <table id="transactionsTable">
+                    <thead>
+                        <tr>
+                            <th>Data</th>
+                            <th>Histórico</th>
+                            <th>Categoria</th>
+                            <th class="text-right">Entrada</th>
+                            <th class="text-right">Saída</th>
+                            <th class="text-right">Saldo</th>
+                            <th>Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody id="transactionsBody"></tbody>
+                    <tfoot>
+                        <tr class="total-row">
+                            <td colspan="3"><strong>TOTAL</strong></td>
+                            <td class="text-right"><strong id="footerReceitas">R$ 0,00</strong></td>
+                            <td class="text-right"><strong id="footerDespesas">R$ 0,00</strong></td>
+                            <td class="text-right"><strong id="footerSaldo">R$ 0,00</strong></td>
+                            <td></td>
+                        </tr>
+                    </tfoot>
+                </table>
+            </div>
+        </section>
+        <section class="charts-section">
+            <div class="chart-container">
+                <h2><i class="fas fa-chart-pie"></i> Despesas por Categoria</h2>
+                <canvas id="categoryChart"></canvas>
+            </div>
+            <div class="chart-container">
+                <h2><i class="fas fa-chart-line"></i> Evolução do Saldo</h2>
+                <canvas id="balanceChart"></canvas>
+            </div>
+        </section>
+        <section class="goals-debts">
+            <div class="goals-container">
+                <h2><i class="fas fa-bullseye"></i> Metas de Economia</h2>
+                <div id="goalsList"></div>
+                <button class="btn btn-secondary" id="addGoalBtn"><i class="fas fa-plus"></i> Adicionar Meta</button>
+            </div>
+            <div class="debts-container">
+                <h2><i class="fas fa-credit-card"></i> Dívidas a Pagar</h2>
+                <div id="debtsList"></div>
+                <button class="btn btn-secondary" id="addDebtBtn"><i class="fas fa-plus"></i> Adicionar Dívida</button>
+            </div>
+        </section>
+    </div>
+    <div id="goalModal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h2>Adicionar Meta de Economia</h2>
+            <form id="goalForm">
+                <div class="form-group">
+                    <label for="goalName">Nome da Meta</label>
+                    <input type="text" id="goalName" required>
+                </div>
+                <div class="form-group">
+                    <label for="goalTarget">Valor Alvo (R$)</label>
+                    <input type="text" id="goalTarget" required>
+                </div>
+                <div class="form-group">
+                    <label for="goalCurrent">Valor Atual (R$)</label>
+                    <input type="text" id="goalCurrent" value="0,00">
+                </div>
+                <button type="submit" class="btn btn-primary">Salvar Meta</button>
+            </form>
+        </div>
+    </div>
+    <div id="debtModal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h2>Adicionar Dívida</h2>
+            <form id="debtForm">
+                <div class="form-group">
+                    <label for="debtName">Descrição</label>
+                    <input type="text" id="debtName" required>
+                </div>
+                <div class="form-group">
+                    <label for="debtTotal">Valor Total (R$)</label>
+                    <input type="text" id="debtTotal" required>
+                </div>
+                <div class="form-group">
+                    <label for="debtPaid">Já Pago (R$)</label>
+                    <input type="text" id="debtPaid" value="0,00">
+                </div>
+                <div class="form-group">
+                    <label for="debtInstallments">Parcelas</label>
+                    <input type="text" id="debtInstallments" placeholder="Ex: 4/5">
+                </div>
+                <button type="submit" class="btn btn-primary">Salvar Dívida</button>
+            </form>
+        </div>
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="js/transactions.js"></script>
+    <script src="js/charts.js"></script>
+    <script src="js/app.js"></script>
+</body>
+</html>
